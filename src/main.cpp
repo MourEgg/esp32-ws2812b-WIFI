@@ -294,11 +294,11 @@ void handleFakeSun() {
   if (alarmOffsetTime != 0) {
     String currTime;
     if(intervalPassed) {
+      getTime();
       if (alarmWeekdays && (timeinfo.tm_wday == 6 || timeinfo.tm_wday == 0)){
         return;
       }
 
-      getTime();
       if(!getLocalTime(&timeinfo)){
         Serial.println("Failed to obtain time");
         return;
