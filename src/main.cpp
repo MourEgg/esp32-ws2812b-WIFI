@@ -7,11 +7,12 @@
 #include <esp_wifi.h>
 #include <esp32-hal-cpu.h>
 #include <Preferences.h>
+#include <ESPmDNS.h>
 #include "time.h"
 
 
 #define DATA_PIN  22
-#define NUM_LEDS  180
+#define NUM_LEDS  120
 #define LED_TYPE  WS2812
 #define COLOR_ORDER GRB
 CRGB leds[NUM_LEDS];
@@ -34,11 +35,12 @@ bool alarmDisableOnce = false;
 // wifi credentials
 const char* ssid = "skacel.jmnet.cz";
 const char* password = "kiov-vracov*";
+const char* host = "led";
 
 // Set your Static IP address
-IPAddress local_IP(192, 168, 1, 69);
+IPAddress local_IP(192, 168, 0, 69);
 // Set your Gateway IP address
-IPAddress gateway(192, 168, 1, 1);
+IPAddress gateway(192, 168, 0, 1);
 IPAddress subnet(255, 255, 255, 0);
 IPAddress primaryDNS(192, 168, 4, 1);
 
@@ -132,6 +134,14 @@ void setupWifi(){
   Serial.println("WiFi connected.");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+
+  /*use mdns for host name resolution*/
+  if (!MDNS.begin(host)) { //http://led.local
+    Serial.println("Error setting up MDNS responder!");
+    while (1) {
+      delay(1000);
+    }
+  }
 
   server.begin();
   esp_wifi_set_ps(WIFI_PS_MIN_MODEM);
@@ -285,6 +295,7 @@ void setAlarmWeekdays(uint8_t weekdays) {
   if (weekdays == 1) {
     week = true;
   }
+  alarmWeekdays = week;
   preferences.putBool("alarmWeekdays", week);
   preferences.end();
 
